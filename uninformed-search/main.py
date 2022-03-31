@@ -1,7 +1,6 @@
 import numpy as np
 import queue
 
-from scipy.fft import idst
 
 STATES = {"NV": 0, "FRONTIER": 1, "VIS": 2}
 
@@ -73,7 +72,6 @@ class Graph():
         #if node == final
         frontier = queue.Queue()
         frontier.put(node)
-        explored = set()
 
         while not frontier.empty():
             node = frontier.get()
