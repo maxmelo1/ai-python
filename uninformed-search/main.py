@@ -8,6 +8,7 @@ class Node():
     def __init__(self, id, label=None ) -> None:
         self.state = STATES["NV"]
         self.dist = -1
+        self.distFinal = -1
         self.links = []
         self.parent = None
         self.id = id
@@ -16,7 +17,8 @@ class Node():
 class Graph():
     def __init__(self, n_vertex, links=None, head=None) -> None:
         self.adj = [ Node(i) for i in range(n_vertex)]
-        self.head = head    
+        self.head = head
+        self.time = 0   
 
     def get(self, id):
         return self.adj[id]
@@ -29,9 +31,11 @@ class Graph():
         b.links.append(a)
     
     def resetStates(self):
+        self.time = 0
         for el in self.adj:
             el.state = STATES['NV']
             el.dist = -1
+            el.parent = None
 
     def print(self):
         for el in self.adj:
@@ -63,6 +67,60 @@ class Graph():
         
         print(f'Path found: {s[:-3]}')
 
+    def dls(self, source, dest):
+        self.resetStates()
+
+        for i in range(len(self.adj)):
+            print('searching in level: ', i)
+            for child in self.adj[source].links:
+                self.resetStates()
+                child.parent = self.adj[source]
+                self.dls_visit(child, self.adj[dest], i)
+                if self.adj[dest].parent is not None:
+                    print('Solution found!')
+                    self.printBFSPath(dest)
+                    return
+        print('No solution found!')
+
+    def dls_visit(self, u, dest, limit):
+        if u == dest:
+            return u
+        elif limit == 0:
+            return None
+        
+        for v in u.links:
+            v.parent = u
+            self.dls_visit(v, dest, limit-1)
+            
+
+        
+        
+
+    def dfs(self, source, dest):
+        self.resetStates()
+
+        for u in self.adj:
+            if u.state == STATES['NV']:
+                self.visit(u)
+        
+        self.printBFSPath(dest)
+
+
+    def visit(self, u):
+
+        self.time +1
+        u.dist = self.time
+        u.state = STATES['FRONTIER']
+
+        for v in u.links:
+            if v.state == STATES['NV']:
+                v.parent = u
+                self.visit(v)
+        u.state = STATES['VIS']
+        self.time += 1
+        u.distFinal = self.time
+        
+
     def bfs(self, source, dest):
         self.resetStates()
 
@@ -89,7 +147,7 @@ class Graph():
 
 g = Graph(8)
 g.head = 1
-g.setLabels(['Araraquara', 'BH', 'São Paulo', 'Ribeirão Preto', 'São Paulo', 'Três Lagoas', 'Campo Grande', 'Campinas'])
+g.setLabels(['Araraquara', 'BH', 'São Carlos', 'Ribeirão Preto', 'São Paulo', 'Três Lagoas', 'Campo Grande', 'Campinas'])
 
 
 g.addLink(0,1)
@@ -107,3 +165,5 @@ g.addLink(5,6)
 #g.print()
 
 g.bfs(1, 6)
+g.dfs(1, 6)
+g.dls(1,6)
